@@ -4,6 +4,7 @@ from flask_jwt_extended import JWTManager, create_access_token, jwt_required, ge
 from config import Config
 from models import User
 import re
+import os
 
 def create_app():
     app = Flask(__name__)
@@ -12,7 +13,10 @@ def create_app():
     # CORS basic configuration
     CORS(app, 
          resources={r"/*": {
-             "origins": ["http://localhost:5173"],
+             "origins": [
+                 os.getenv('FRONTEND_URL', 'http://localhost:5173'),
+                 'https://app-login-users.vercel.app'
+             ],
              "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
              "allow_headers": ["Content-Type", "Authorization"],
              "expose_headers": ["Content-Type", "Authorization"],
@@ -136,4 +140,5 @@ def create_app():
 
 if __name__ == '__main__':
     app = create_app()
-    app.run(host='localhost', port=5004, debug=True)
+    port = int(os.environ.get('PORT', 5004))
+    app.run(host='0.0.0.0', port=port, debug=False)
