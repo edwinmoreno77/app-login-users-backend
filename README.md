@@ -6,6 +6,7 @@ This is an authentication backend developed with Flask that provides endpoints f
 
 - Python 3.8 or higher
 - Pipenv (dependency manager)
+- MongoDB (local or MongoDB Atlas)
 
 ## Installation
 
@@ -23,6 +24,33 @@ pipenv install
 3. Configure environment variables:
    - Copy `example.env` to `.env`
    - Adjust variables as needed
+
+## MongoDB Configuration
+
+### Local MongoDB
+1. Install MongoDB Community Edition from [MongoDB Download Center](https://www.mongodb.com/try/download/community)
+2. Start MongoDB service
+3. Set `MONGODB_URI` in your `.env` file:
+```
+MONGODB_URI=mongodb://localhost:27017/login_db
+```
+
+### MongoDB Atlas (Recommended for Production)
+1. Create a free account at [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
+2. Create a new cluster
+3. Set up database access (create a user with password)
+4. Set up network access (allow access from anywhere or specific IPs)
+5. Get your connection string from the "Connect" button
+6. Set `MONGODB_URI` in your `.env` file:
+```
+MONGODB_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/login_db?retryWrites=true&w=majority
+```
+
+### Database Initialization
+To initialize the database with sample users, run:
+```bash
+python init_db.py
+```
 
 ## Running the Project
 
@@ -99,8 +127,38 @@ backendLogin/
 └── example.env        # Environment variables example
 ```
 
+## Database Structure
+
+### User Model
+The application uses MongoDB with the following user schema:
+
+```python
+{
+    'name': String,          # Required, max length 100
+    'email': String,         # Required, unique
+    'password_hash': String, # Required, hashed password
+    'is_active': Boolean,    # Default: true
+    'created_at': DateTime,  # Auto-generated
+    'updated_at': DateTime,  # Auto-updated
+    'last_login': DateTime,  # Updated on login
+    'profile': {
+        'avatar': String,    # Optional
+        'phone': String,     # Optional
+        'address': String    # Optional
+    }
+}
+```
+
+### Indexes
+The following indexes are created for optimal performance:
+- `email` (unique)
+- `is_active`
+- `created_at`
+
 ## Development Notes
 
 - JWT is used for authentication
 - Passwords are securely stored with hash
-- Email and password validations are implemented 
+- Email and password validations are implemented
+- MongoDB Atlas is recommended for production deployments
+- The database connection is configured through environment variables 
